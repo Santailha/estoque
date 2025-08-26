@@ -21,12 +21,15 @@ auth.onAuthStateChanged(user => {
             window.location.href = 'dashboard.html';
         }
     } else {
+        // Se não estiver logado, redireciona para o index, a menos que já esteja lá
         if (currentPage !== 'index.html' && currentPage !== '') {
             window.location.href = 'index.html';
         }
     }
 });
 
+
+// --- LÓGICA DA TELA DE LOGIN ---
 if (currentPage === 'index.html' || currentPage === '') {
     const loginForm = document.getElementById('login-form');
     const errorMessage = document.getElementById('error-message');
@@ -38,10 +41,8 @@ if (currentPage === 'index.html' || currentPage === '') {
             const password = document.getElementById('password').value;
 
             auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    window.location.href = 'dashboard.html';
-                })
-                .catch((error) => {
+                .then(() => window.location.href = 'dashboard.html')
+                .catch(error => {
                     errorMessage.textContent = 'E-mail ou senha inválidos.';
                     console.error("Erro no login:", error);
                 });
@@ -49,6 +50,8 @@ if (currentPage === 'index.html' || currentPage === '') {
     }
 }
 
+
+// --- LÓGICA DO DASHBOARD ---
 if (currentPage === 'dashboard.html') {
     db = firebase.firestore();
 
@@ -56,7 +59,6 @@ if (currentPage === 'dashboard.html') {
     const addItemForm = document.getElementById('add-item-form');
     const stockTableBody = document.querySelector('#stock-table tbody');
     
-    // Modal de movimentação
     const modal = document.getElementById('modal');
     const modalTitle = document.getElementById('modal-title');
     const movementForm = document.getElementById('movement-form');
@@ -65,7 +67,6 @@ if (currentPage === 'dashboard.html') {
     const modalSector = document.getElementById('modal-sector');
     const closeButton = modal.querySelector('.close-button');
 
-    // Elementos do Modal de Histórico
     const historyModal = document.getElementById('history-modal');
     const historyModalTitle = document.getElementById('history-modal-title');
     const historyTableBody = document.getElementById('history-table-body');
@@ -73,11 +74,7 @@ if (currentPage === 'dashboard.html') {
 
     let currentMovementType = '';
 
-    if(logoutButton) {
-        logoutButton.addEventListener('click', () => {
-            auth.signOut();
-        });
-    }
+    if(logoutButton) logoutButton.addEventListener('click', () => auth.signOut());
 
     if(addItemForm) {
         addItemForm.addEventListener('submit', (e) => {
@@ -85,20 +82,14 @@ if (currentPage === 'dashboard.html') {
             const itemName = document.getElementById('item-name').value;
             const itemQuantity = parseInt(document.getElementById('item-quantity').value);
 
-            db.collection('estoque').add({
-                nome: itemName,
-                quantidade: itemQuantity
-            }).then(() => {
-                console.log("Item adicionado com sucesso!");
-                addItemForm.reset();
-            }).catch(error => {
-                console.error("Erro ao adicionar item: ", error);
-            });
+            db.collection('estoque').add({ nome: itemName, quantidade: itemQuantity })
+              .then(() => addItemForm.reset())
+              .catch(error => console.error("Erro ao adicionar item: ", error));
         });
     }
 
     if (stockTableBody) {
-        db.collection('estoque').onSnapshot(snapshot => {
+        db.collection('estoque').orderBy('nome').onSnapshot(snapshot => {
             stockTableBody.innerHTML = '';
             snapshot.forEach(doc => {
                 const item = doc.data();
@@ -122,30 +113,20 @@ if (currentPage === 'dashboard.html') {
     
     if(stockTableBody) {
         stockTableBody.addEventListener('click', (e) => {
-            if (e.target.classList.contains('btn-entrada') || e.target.classList.contains('btn-saida')) {
-                const itemId = e.target.dataset.id;
-                const itemName = e.target.dataset.nome;
-                
+            const target = e.target;
+            const itemId = target.dataset.id;
+            const itemName = target.dataset.nome;
+
+            if (target.classList.contains('btn-entrada') || target.classList.contains('btn-saida')) {
                 modalItemId.value = itemId;
-                
-                if (e.target.classList.contains('btn-entrada')) {
-                    currentMovementType = 'entrada';
-                    modalTitle.textContent = `Registrar Entrada para: ${itemName}`;
-                    modalSector.style.display = 'none';
-                    modalSector.required = false;
-                } else {
-                    currentMovementType = 'saida';
-                    modalTitle.textContent = `Registrar Saída para: ${itemName}`;
-                    modalSector.style.display = 'block';
-                    modalSector.required = true;
-                }
-                
+                currentMovementType = target.classList.contains('btn-entrada') ? 'entrada' : 'saida';
+                modalTitle.textContent = `Registrar ${currentMovementType === 'entrada' ? 'Entrada' : 'Saída'} para: ${itemName}`;
+                modalSector.style.display = currentMovementType === 'saida' ? 'block' : 'none';
+                modalSector.required = currentMovementType === 'saida';
                 modal.style.display = 'block';
             }
 
-            if (e.target.classList.contains('btn-historico')) {
-                const itemId = e.target.dataset.id;
-                const itemName = e.target.dataset.nome;
+            if (target.classList.contains('btn-historico')) {
                 showHistory(itemId, itemName);
             }
         });
@@ -156,34 +137,19 @@ if (currentPage === 'dashboard.html') {
         historyTableBody.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>';
         historyModal.style.display = 'block';
 
-        db.collection('movimentacoes')
-          .where('itemId', '==', itemId)
-          .orderBy('data', 'desc')
-          .get()
+        db.collection('movimentacoes').where('itemId', '==', itemId).orderBy('data', 'desc').get()
           .then(snapshot => {
               if (snapshot.empty) {
                   historyTableBody.innerHTML = '<tr><td colspan="4">Nenhuma movimentação encontrada.</td></tr>';
                   return;
               }
-
               historyTableBody.innerHTML = '';
               snapshot.forEach(doc => {
                   const mov = doc.data();
-                  
                   const data = mov.data ? mov.data.toDate().toLocaleString('pt-BR') : 'Data inválida';
                   const tipo = mov.tipo === 'entrada' ? '✅ Entrada' : '❌ Saída';
-                  const quantidade = mov.quantidade;
                   const setor = mov.setor || '-';
-
-                  const row = `
-                    <tr>
-                        <td>${data}</td>
-                        <td>${tipo}</td>
-                        <td>${quantidade}</td>
-                        <td>${setor}</td>
-                    </tr>
-                  `;
-                  historyTableBody.innerHTML += row;
+                  historyTableBody.innerHTML += `<tr><td>${data}</td><td>${tipo}</td><td>${mov.quantidade}</td><td>${setor}</td></tr>`;
               });
           })
           .catch(error => {
@@ -192,76 +158,120 @@ if (currentPage === 'dashboard.html') {
           });
     }
 
-    if(closeButton) {
-        closeButton.onclick = () => {
-            modal.style.display = 'none';
-            movementForm.reset();
-        };
-    }
-
-    if(historyCloseButton) {
-        historyCloseButton.onclick = () => {
-            historyModal.style.display = 'none';
-        };
-    }
+    if(closeButton) closeButton.onclick = () => { modal.style.display = 'none'; movementForm.reset(); };
+    if(historyCloseButton) historyCloseButton.onclick = () => { historyModal.style.display = 'none'; };
     
     window.onclick = (event) => {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-            movementForm.reset();
-        }
-        if (event.target == historyModal) {
-            historyModal.style.display = 'none';
-        }
+        if (event.target == modal) { modal.style.display = 'none'; movementForm.reset(); }
+        if (event.target == historyModal) { historyModal.style.display = 'none'; }
     };
     
     if(movementForm){
         movementForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
             const itemId = modalItemId.value;
             const quantity = parseInt(modalQuantity.value);
             const sector = modalSector.value;
-            
             const itemRef = db.collection('estoque').doc(itemId);
             
             db.runTransaction(transaction => {
                 return transaction.get(itemRef).then(doc => {
                     if (!doc.exists) throw "Documento não existe!";
-
-                    let newQuantity;
-                    if (currentMovementType === 'saida') {
-                        newQuantity = doc.data().quantidade - quantity;
-                        if (newQuantity < 0) {
-                            alert("Erro: Estoque insuficiente!");
-                            throw "Estoque insuficiente!";
-                        }
-                    } else {
-                        newQuantity = doc.data().quantidade + quantity;
-                    }
+                    let newQuantity = doc.data().quantidade + (currentMovementType === 'entrada' ? quantity : -quantity);
+                    if (newQuantity < 0) { alert("Erro: Estoque insuficiente!"); throw "Estoque insuficiente!"; }
                     
                     transaction.update(itemRef, { quantidade: newQuantity });
-
                     const movRef = db.collection('movimentacoes').doc();
-                    const logData = {
-                        itemId: itemId,
-                        nomeItem: doc.data().nome,
-                        tipo: currentMovementType,
-                        quantidade: quantity,
-                        data: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    if (currentMovementType === 'saida') {
-                        logData.setor = sector;
-                    }
+                    const logData = { itemId, nomeItem: doc.data().nome, tipo: currentMovementType, quantidade: quantity, data: firebase.firestore.FieldValue.serverTimestamp() };
+                    if (currentMovementType === 'saida') logData.setor = sector;
                     transaction.set(movRef, logData);
                 });
             }).then(() => {
-                console.log("Transação concluída com sucesso!");
                 modal.style.display = 'none';
                 movementForm.reset();
-            }).catch(error => {
-                console.error("Erro na transação: ", error);
-            });
+            }).catch(error => console.error("Erro na transação: ", error));
         });
+    }
+}
+
+
+// --- LÓGICA DO RELATÓRIO ---
+if (currentPage === 'relatorio.html') {
+    db = firebase.firestore();
+
+    const logoutButton = document.getElementById('logout-button');
+    const filterForm = document.getElementById('filter-form');
+    const startDateInput = document.getElementById('start-date');
+    const endDateInput = document.getElementById('end-date');
+    const reportResults = document.getElementById('report-results');
+    const totalEntradasElem = document.getElementById('total-entradas');
+    const totalSaidasElem = document.getElementById('total-saidas');
+    const reportTableBody = document.getElementById('report-table-body');
+
+    if (logoutButton) logoutButton.addEventListener('click', () => auth.signOut());
+
+    if (filterForm) {
+        filterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Adiciona a hora inicial (00:00:00) e final (23:59:59) para incluir o dia todo
+            const startDate = new Date(startDateInput.value + 'T00:00:00');
+            const endDate = new Date(endDateInput.value + 'T23:59:59');
+
+            if (endDate < startDate) {
+                alert('A data final não pode ser anterior à data de início.');
+                return;
+            }
+
+            // Converte para Timestamps do Firebase
+            const startTimestamp = firebase.firestore.Timestamp.fromDate(startDate);
+            const endTimestamp = firebase.firestore.Timestamp.fromDate(endDate);
+
+            generateReport(startTimestamp, endTimestamp);
+        });
+    }
+
+    function generateReport(start, end) {
+        reportTableBody.innerHTML = '<tr><td colspan="5">Gerando relatório...</td></tr>';
+        reportResults.style.display = 'block';
+        let totalEntradas = 0;
+        let totalSaidas = 0;
+
+        db.collection('movimentacoes')
+          .where('data', '>=', start)
+          .where('data', '<=', end)
+          .orderBy('data', 'desc')
+          .get()
+          .then(snapshot => {
+              if (snapshot.empty) {
+                  reportTableBody.innerHTML = '<tr><td colspan="5">Nenhuma movimentação encontrada no período.</td></tr>';
+                  totalEntradasElem.textContent = 0;
+                  totalSaidasElem.textContent = 0;
+                  return;
+              }
+
+              reportTableBody.innerHTML = '';
+              snapshot.forEach(doc => {
+                  const mov = doc.data();
+                  
+                  if (mov.tipo === 'entrada') {
+                      totalEntradas += mov.quantidade;
+                  } else {
+                      totalSaidas += mov.quantidade;
+                  }
+
+                  const data = mov.data ? mov.data.toDate().toLocaleString('pt-BR') : 'Data inválida';
+                  const tipo = mov.tipo === 'entrada' ? '✅ Entrada' : '❌ Saída';
+                  const setor = mov.setor || '-';
+                  reportTableBody.innerHTML += `<tr><td>${data}</td><td>${mov.nomeItem}</td><td>${tipo}</td><td>${mov.quantidade}</td><td>${setor}</td></tr>`;
+              });
+              
+              totalEntradasElem.textContent = totalEntradas;
+              totalSaidasElem.textContent = totalSaidas;
+          })
+          .catch(error => {
+              console.error("Erro ao gerar relatório: ", error);
+              reportTableBody.innerHTML = '<tr><td colspan="5">Erro ao carregar o relatório. Verifique o console.</td></tr>';
+          });
     }
 }
