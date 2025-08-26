@@ -343,3 +343,18 @@ body {
 #stock-table td.history-cell {
     text-align: center;
 }
+/* ... (todo o seu CSS existente) ... */
+
+/* ESTILOS ADICIONADOS PARA O FILTRO DE BUSCA */
+
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+}
