@@ -18,14 +18,14 @@ const db = firebase.firestore();
 
 const currentPage = window.location.pathname.split('/').pop();
 
+// Este "vigia" garante que o usuário não acesse o dashboard sem estar logado
+// e redireciona para o dashboard se ele já estiver logado e acessar a página de login.
 auth.onAuthStateChanged(user => {
     if (user) {
-        // Se o usuário está logado e na tela de login, redireciona para o dashboard
         if (currentPage === 'index.html' || currentPage === '') {
             window.location.href = 'dashboard.html';
         }
     } else {
-        // Se o usuário não está logado e está em qualquer página que não seja a de login, redireciona para o login
         if (currentPage !== 'index.html' && currentPage !== '') {
             window.location.href = 'index.html';
         }
@@ -46,7 +46,9 @@ if (currentPage === 'index.html' || currentPage === '') {
 
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // Login bem-sucedido, onAuthStateChanged vai redirecionar
+                    // *** CORREÇÃO APLICADA AQUI ***
+                    // Login bem-sucedido! Redireciona o usuário imediatamente.
+                    window.location.href = 'dashboard.html';
                 })
                 .catch((error) => {
                     errorMessage.textContent = 'E-mail ou senha inválidos.';
@@ -194,7 +196,7 @@ if (currentPage === 'dashboard.html') {
                     const movRef = db.collection('movimentacoes').doc();
                     const logData = {
                         itemId: itemId,
-                        nomeItem: doc.data().nome, // Adicionado para facilitar a leitura dos logs
+                        nomeItem: doc.data().nome,
                         tipo: currentMovementType,
                         quantidade: quantity,
                         data: firebase.firestore.FieldValue.serverTimestamp()
