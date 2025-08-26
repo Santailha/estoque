@@ -8,18 +8,15 @@ const firebaseConfig = {
 };
 
 // Inicializa o Firebase
-const app = firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-// Obtém as funções dos serviços que vamos usar
+// Obtém os serviços que vamos usar
 const auth = firebase.auth();
-const db = firebase.firestore();
+let db; // Declarado aqui, mas inicializado depois
 
 // --- LÓGICA GERAL E AUTENTICAÇÃO ---
-
 const currentPage = window.location.pathname.split('/').pop();
 
-// Este "vigia" garante que o usuário não acesse o dashboard sem estar logado
-// e redireciona para o dashboard se ele já estiver logado e acessar a página de login.
 auth.onAuthStateChanged(user => {
     if (user) {
         if (currentPage === 'index.html' || currentPage === '') {
@@ -33,7 +30,6 @@ auth.onAuthStateChanged(user => {
 });
 
 // --- LÓGICA DA TELA DE LOGIN (index.html) ---
-
 if (currentPage === 'index.html' || currentPage === '') {
     const loginForm = document.getElementById('login-form');
     const errorMessage = document.getElementById('error-message');
@@ -46,8 +42,6 @@ if (currentPage === 'index.html' || currentPage === '') {
 
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // *** CORREÇÃO APLICADA AQUI ***
-                    // Login bem-sucedido! Redireciona o usuário imediatamente.
                     window.location.href = 'dashboard.html';
                 })
                 .catch((error) => {
@@ -59,8 +53,11 @@ if (currentPage === 'index.html' || currentPage === '') {
 }
 
 // --- LÓGICA DO DASHBOARD (dashboard.html) ---
-
 if (currentPage === 'dashboard.html') {
+    // *** CORREÇÃO APLICADA AQUI ***
+    // Inicializa o Firestore apenas na página do dashboard
+    db = firebase.firestore();
+
     const logoutButton = document.getElementById('logout-button');
     const addItemForm = document.getElementById('add-item-form');
     const stockTableBody = document.querySelector('#stock-table tbody');
@@ -74,16 +71,14 @@ if (currentPage === 'dashboard.html') {
     const modalSector = document.getElementById('modal-sector');
     const closeButton = document.querySelector('.close-button');
 
-    let currentMovementType = ''; // 'entrada' ou 'saida'
+    let currentMovementType = '';
 
-    // Logout
     if(logoutButton) {
         logoutButton.addEventListener('click', () => {
             auth.signOut();
         });
     }
 
-    // Adicionar novo item
     if(addItemForm) {
         addItemForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -102,10 +97,9 @@ if (currentPage === 'dashboard.html') {
         });
     }
 
-    // Listar itens em tempo real
     if (stockTableBody) {
         db.collection('estoque').onSnapshot(snapshot => {
-            stockTableBody.innerHTML = ''; // Limpa a tabela antes de recarregar
+            stockTableBody.innerHTML = '';
             snapshot.forEach(doc => {
                 const item = doc.data();
                 const row = `
@@ -123,7 +117,6 @@ if (currentPage === 'dashboard.html') {
         });
     }
     
-    // Abrir Modal para entrada ou saída
     if(stockTableBody) {
         stockTableBody.addEventListener('click', (e) => {
             if (e.target.classList.contains('btn-entrada') || e.target.classList.contains('btn-saida')) {
@@ -149,7 +142,6 @@ if (currentPage === 'dashboard.html') {
         });
     }
 
-    // Fechar Modal
     if(closeButton) {
         closeButton.onclick = () => {
             modal.style.display = 'none';
@@ -163,7 +155,6 @@ if (currentPage === 'dashboard.html') {
         }
     };
     
-    // Registrar movimentação (submissão do form do modal)
     if(movementForm){
         movementForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -176,9 +167,7 @@ if (currentPage === 'dashboard.html') {
             
             db.runTransaction(transaction => {
                 return transaction.get(itemRef).then(doc => {
-                    if (!doc.exists) {
-                        throw "Documento não existe!";
-                    }
+                    if (!doc.exists) throw "Documento não existe!";
 
                     let newQuantity;
                     if (currentMovementType === 'saida') {
