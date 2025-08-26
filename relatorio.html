@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Movimentações</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="dashboard-header">
+        <h1>Relatório de Movimentações</h1>
+        <div>
+            <a href="dashboard.html" class="header-link">Voltar ao Estoque</a>
+            <button id="logout-button">Sair</button>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <div class="card">
+            <h2>Filtrar por Período</h2>
+            <form id="filter-form" class="filter-container">
+                <div>
+                    <label for="start-date">Data de Início:</label>
+                    <input type="date" id="start-date" required>
+                </div>
+                <div>
+                    <label for="end-date">Data de Fim:</label>
+                    <input type="date" id="end-date" required>
+                </div>
+                <button type="submit">Gerar Relatório</button>
+            </form>
+        </div>
+
+        <div class="card" id="report-results" style="display: none;">
+            <h2>Resultados da Análise</h2>
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h3>Total de Entradas</h3>
+                    <p id="total-entradas">0</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total de Saídas</h3>
+                    <p id="total-saidas">0</p>
+                </div>
+            </div>
+            <h3>Movimentações no Período</h3>
+            <table id="report-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Item</th>
+                        <th>Tipo</th>
+                        <th>Quantidade</th>
+                        <th>Setor</th>
+                    </tr>
+                </thead>
+                <tbody id="report-table-body">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
