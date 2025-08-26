@@ -30,6 +30,7 @@
                         <th>Item</th>
                         <th>Estoque Atual</th>
                         <th>Ações</th>
+                        <th>Histórico</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,6 +49,25 @@
                 <input type="text" id="modal-sector" placeholder="Setor (apenas para saídas)">
                 <button type="submit" id="modal-submit-button">Registrar</button>
             </form>
+        </div>
+    </div>
+
+    <div id="history-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="history-modal-title">Histórico de Movimentações</h3>
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo</th>
+                        <th>Quantidade</th>
+                        <th>Setor (Solicitante)</th>
+                    </tr>
+                </thead>
+                <tbody id="history-table-body">
+                    </tbody>
+            </table>
         </div>
     </div>
 
