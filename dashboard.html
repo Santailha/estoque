@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Estoque</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="dashboard-header">
+        <h1>Painel de Controle de Estoque</h1>
+        <button id="logout-button">Sair</button>
+    </header>
+
+    <main class="dashboard-container">
+        <div class="card">
+            <h2>Adicionar Novo Item</h2>
+            <form id="add-item-form">
+                <input type="text" id="item-name" placeholder="Nome do Item" required>
+                <input type="number" id="item-quantity" placeholder="Quantidade Inicial" required min="0">
+                <button type="submit">Adicionar ao Estoque</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Estoque Atual</h2>
+            <table id="stock-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Estoque Atual</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="modal-title">Registrar Movimentação</h3>
+            <form id="movement-form">
+                <input type="hidden" id="modal-item-id">
+                <input type="number" id="modal-quantity" placeholder="Quantidade" required min="1">
+                <input type="text" id="modal-sector" placeholder="Setor (apenas para saídas)">
+                <button type="submit" id="modal-submit-button">Registrar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script src="app.js"></script>
+</body>
+</html>
