@@ -1,11 +1,10 @@
-// Cole aqui o objeto de configuração do Firebase que você copiou
 const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_AUTH_DOMAIN",
-    projectId: "SEU_PROJECT_ID",
-    storageBucket: "SEU_STORAGE_BUCKET",
-    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-    appId: "SEU_APP_ID"
+  apiKey: "AIzaSyBoAxno3WU0XxqgG5An4QgRsnUhiqJytJg",
+  authDomain: "estoque-produtos-ee79e.firebaseapp.com",
+  projectId: "estoque-produtos-ee79e",
+  storageBucket: "estoque-produtos-ee79e.firebasestorage.app",
+  messagingSenderId: "104213962376",
+  appId: "1:104213962376:web:49c93a7966a930445b893d"
 };
 
 // Inicializa o Firebase
