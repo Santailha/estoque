@@ -174,7 +174,7 @@ body {
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
-    max-width: 500px;
+    max-width: 600px; /* Aumentado para caber a nova tabela */
     border-radius: 8px;
     position: relative;
 }
@@ -212,4 +212,37 @@ body {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+}
+
+/* Estilo para o botão de histórico (lupa) */
+.btn-historico {
+    background-color: #4a90e2; /* Um azul neutro */
+    cursor: pointer;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 16px;
+}
+
+/* Ajustes na tabela do modal de histórico */
+#history-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+#history-table th, #history-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+#history-table th {
+    background-color: var(--fundo-claro);
+}
+
+/* Centralizar o botão de histórico na tabela */
+#stock-table td.history-cell {
+    text-align: center;
 }
