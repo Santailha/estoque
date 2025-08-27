@@ -28,6 +28,14 @@
                     <label for="end-date">Data de Fim:</label>
                     <input type="date" id="end-date" required>
                 </div>
+                <div>
+                    <label for="unidade-filter">Unidade:</label>
+                    <select id="unidade-filter">
+                        <option value="todas">Todas</option>
+                        <option value="Campeche">Campeche</option>
+                        <option value="Centro">Centro</option>
+                    </select>
+                </div>
                 <button type="submit">Gerar Relatório</button>
             </form>
         </div>
@@ -53,7 +61,7 @@
                     <tr>
                         <th>Data</th>
                         <th>Item</th>
-                        <th>Tipo</th>
+                        <th>Unidade</th> <th>Tipo</th>
                         <th>Quantidade</th>
                         <th>Setor</th>
                     </tr>
