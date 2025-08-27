@@ -22,6 +22,11 @@
             <form id="add-item-form">
                 <input type="text" id="item-name" placeholder="Nome do Item" required>
                 <input type="number" id="item-quantity" placeholder="Quantidade Inicial" required min="0">
+                <select id="item-unidade" required>
+                    <option value="" disabled selected>Selecione a Unidade</option>
+                    <option value="Campeche">Campeche</option>
+                    <option value="Centro">Centro</option>
+                </select>
                 <button type="submit">Adicionar ao Estoque</button>
             </form>
         </div>
@@ -35,7 +40,7 @@
                 <thead>
                     <tr>
                         <th>Item</th>
-                        <th>Estoque Atual</th>
+                        <th>Unidade</th> <th>Estoque Atual</th>
                         <th>Ações</th>
                         <th>Histórico</th>
                     </tr>
